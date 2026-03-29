@@ -1,0 +1,46 @@
+# Sample Natural Language Inputs for the DSL Compiler
+# You can copy and paste these directly into the interactive CLI (cli.py).
+
+==================================================
+Scenario 1: Personal Loan Approval
+==================================================
+Create a policy called CreditCheck that takes inputs for credit_score, annual_income, and existing_debt.
+The policy should pass if the credit score is at least 700, the annual income is at least 30000, and existing debt is less than 10000.
+Also create a policy called IdentityVerification that takes a boolean has_valid_id and a number age.
+It passes if they have a valid ID and are at least 18 years old.
+Now make a workflow called LoanApproval. 
+First step is VerifyIdentity which executes the IdentityVerification policy. If it passes, go to the next step, if it fails reject with "Identity verification failed". 
+The next step CheckCredit executes the CreditCheck policy. On pass go to next, on fail reject with "Credit check failed".
+Then step CalculateTerms performs an action to "Calculate loan interest rate". On complete go to next.
+Finally, step DisburseFunds performs an action to "Transfer approved amount". On complete, the workflow is done.
+
+==================================================
+Scenario 2: E-Commerce Order Fulfillment
+==================================================
+Write a policy named OrderValidation taking item_count, total_price, and a boolean is_in_stock.
+It should evaluate to true if the item count is greater than 0, the total price is greater than 0, and stock is available.
+
+Write a FraudDetection policy taking order_amount, failed_attempts, and account_age_days.
+It should pass if the order amount is under 5000, failed attempts are 2 or fewer, and the account age is 30 days or older.
+
+Write a workflow OrderFulfillment. 
+Step ValidateOrder runs the OrderValidation policy. Pass -> next, Fail -> reject "Bad order". 
+Step ScreenForFraud runs the FraudDetection policy. Pass -> next, Fail -> reject "Suspected fraud". 
+Step ShipOrder action "Ship items". Complete -> next. 
+Step NotifyCustomer action "Send tracking info". Complete -> done.
+
+==================================================
+Scenario 3: Server Health Monitoring (Short)
+==================================================
+Create a ServerHealth policy. Inputs are cpu_usage, memory_usage, disk_usage, and a boolean is_responsive.
+Rules:
+- cpu is under 90
+- memory is under 85
+- disk is under 80
+- server is responsive
+Evaluate that all rules are true.
+
+Then create an IncidentResponse workflow. 
+First step CheckHealth executes ServerHealth policy. If it passes, go to the next step. If it fails, reject with "Server offline". 
+Step LogStatus performs an action "Log metrics". Complete -> next. 
+Step ClearAlert performs action "Mark healthy". Complete -> done.
