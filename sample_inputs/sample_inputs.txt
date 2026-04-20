@@ -19,10 +19,8 @@ Scenario 2: E-Commerce Order Fulfillment
 ==================================================
 Write a policy named OrderValidation taking item_count, total_price, and a boolean is_in_stock.
 It should evaluate to true if the item count is greater than 0, the total price is greater than 0, and stock is available.
-
 Write a FraudDetection policy taking order_amount, failed_attempts, and account_age_days.
 It should pass if the order amount is under 5000, failed attempts are 2 or fewer, and the account age is 30 days or older.
-
 Write a workflow OrderFulfillment. 
 Step ValidateOrder runs the OrderValidation policy. Pass -> next, Fail -> reject "Bad order". 
 Step ScreenForFraud runs the FraudDetection policy. Pass -> next, Fail -> reject "Suspected fraud". 
@@ -39,7 +37,6 @@ Rules:
 - disk is under 80
 - server is responsive
 Evaluate that all rules are true.
-
 Then create an IncidentResponse workflow. 
 First step CheckHealth executes ServerHealth policy. If it passes, go to the next step. If it fails, reject with "Server offline". 
 Step LogStatus performs an action "Log metrics". Complete -> next. 

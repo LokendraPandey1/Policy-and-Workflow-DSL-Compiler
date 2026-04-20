@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policy & Workflow Compiler Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">Policy & Workflow DSL Compiler</p>
+                <h1>Compiler studio, not a chatbot shell.</h1>
+                <p class="hero-text">
+                    This interface follows the real architecture of the project: authoring, lexical analysis, parsing,
+                    semantic validation, Python code generation, and runtime interpretation. Each phase is visible and traceable.
+                </p>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-label">Pipeline</span>
+                    <strong>5 phases</strong>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-label">Modes</span>
+                    <strong>DSL + NL</strong>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-label">Output</span>
+                    <strong>Python + trace</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="phase-strip" id="phaseStrip">
+            {% for phase in phase_specs %}
+            <article class="phase-card tone-idle" data-phase="{{ phase.key }}">
+                <div class="phase-number">{{ phase.number }}</div>
+                <h2>{{ phase.title }}</h2>
+                <p>{{ phase.subtitle }}</p>
+                <span class="phase-status">Waiting</span>
+            </article>
+            {% endfor %}
+        </section>
+
+        <main class="workspace">
+            <section class="workspace-column workspace-column-left">
+                <div class="panel panel-brief">
+                    <div class="panel-head">
+                        <div>
+                            <p class="panel-kicker">Input lane</p>
+                            <h3>Natural language brief</h3>
+                        </div>
+                        <button class="button button-secondary" id="translateBtn">Translate to DSL</button>
+                    </div>
+                    <p class="panel-note">
+                        Use this when you want Gemini to draft DSL from a plain-English description.
+                    </p>
+                    <textarea id="nlInput" class="text-area text-area-brief" spellcheck="false">{{ initial_nl }}</textarea>
+                    <div class="sample-row">
+                        <button class="chip" data-sample="loan_brief">Loan Brief</button>
+                        <button class="chip" data-sample="server_brief">Server Brief</button>
+                    </div>
+                </div>
+
+                <div class="panel panel-source">
+                    <div class="panel-head">
+                        <div>
+                            <p class="panel-kicker">Authoring lane</p>
+                            <h3>Source workshop</h3>
+                        </div>
+                        <div class="action-row">
+                            <button class="button button-primary" id="compileBtn">Compile pipeline</button>
+                            <button class="button button-secondary" id="runBtn">Run selected target</button>
+                        </div>
+                    </div>
+                    <p class="panel-note">
+                        Edit raw DSL here, then compile to light up the full stage board.
+                    </p>
+                    <textarea id="sourceInput" class="text-area text-area-code" spellcheck="false">{{ initial_source }}</textarea>
+                    <div class="sample-row">
+                        <button class="chip" data-sample="enrollment_dsl">Enrollment DSL</button>
+                        <button class="chip chip-ghost" id="clearOutputsBtn">Clear outputs</button>
+                    </div>
+                </div>
+
+                <div class="panel panel-runtime">
+                    <div class="panel-head">
+                        <div>
+                            <p class="panel-kicker">Execution lane</p>
+                            <h3>Runtime console</h3>
+                        </div>
+                    </div>
+                    <p class="panel-note">
+                        Choose a policy or workflow target after compilation. Input fields are generated from the AST.
+                    </p>
+                    <label class="field-label" for="targetSelect">Executable target</label>
+                    <select id="targetSelect" class="input-select">
+                        <option value="">Compile a valid program first</option>
+                    </select>
+                    <div id="runtimeInputs" class="runtime-inputs empty-state">
+                        Compile a valid program to expose executable targets and their input fields.
+                    </div>
+                </div>
+            </section>
+
+            <section class="workspace-column workspace-column-right">
+                <div class="metrics-grid">
+                    <article class="metric-card">
+                        <span>Source lines</span>
+                        <strong id="metric-source-lines">--</strong>
+                    </article>
+                    <article class="metric-card">
+                        <span>Tokens</span>
+                        <strong id="metric-token-count">--</strong>
+                    </article>
+                    <article class="metric-card">
+                        <span>Policies</span>
+                        <strong id="metric-policy-count">--</strong>
+                    </article>
+                    <article class="metric-card">
+                        <span>Workflows</span>
+                        <strong id="metric-workflow-count">--</strong>
+                    </article>
+                    <article class="metric-card">
+                        <span>Semantic state</span>
+                        <strong id="metric-semantic-state">--</strong>
+                    </article>
+                    <article class="metric-card">
+                        <span>Runtime</span>
+                        <strong id="metric-runtime-state">--</strong>
+                    </article>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" data-tab="overview">Overview</button>
+                        <button class="tab-button" data-tab="lexer">Lexer</button>
+                        <button class="tab-button" data-tab="parser">Parser</button>
+                        <button class="tab-button" data-tab="semantic">Semantic</button>
+                        <button class="tab-button" data-tab="codegen">Code Gen</button>
+                        <button class="tab-button" data-tab="runtime">Runtime</button>
+                    </div>
+
+                    <div class="tab-panels">
+                        <section class="tab-panel active" data-tab-panel="overview">
+                            <div class="panel panel-tab">
+                                <div class="panel-head">
+                                    <div>
+                                        <p class="panel-kicker">System view</p>
+                                        <h3>Pipeline snapshot</h3>
+                                    </div>
+                                </div>
+                                <pre id="overviewOutput" class="code-block prose-block">Load or write DSL, then compile to inspect the full pipeline.</pre>
+                            </div>
+                        </section>
+
+                        <section class="tab-panel" data-tab-panel="lexer">
+                            <div class="panel panel-tab">
+                                <div class="panel-head">
+                                    <div>
+                                        <p class="panel-kicker">Phase 01</p>
+                                        <h3>Token stream</h3>
+                                    </div>
+                                </div>
+                                <div class="table-shell">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Value</th>
+                                                <th>Line</th>
+                                                <th>Col</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tokensBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="tab-panel" data-tab-panel="parser">
+                            <div class="panel panel-tab">
+                                <div class="panel-head">
+                                    <div>
+                                        <p class="panel-kicker">Phase 02</p>
+                                        <h3>AST inspector</h3>
+                                    </div>
+                                </div>
+                                <div id="astTree" class="ast-tree empty-state">Compile a valid program to inspect the AST.</div>
+                            </div>
+                        </section>
+
+                        <section class="tab-panel" data-tab-panel="semantic">
+                            <div class="panel panel-tab">
+                                <div class="panel-head">
+                                    <div>
+                                        <p class="panel-kicker">Phase 03</p>
+                                        <h3>Semantic findings</h3>
+                                    </div>
+                                </div>
+                                <pre id="semanticOutput" class="code-block">No semantic analysis yet.</pre>
+                            </div>
+                        </section>
+
+                        <section class="tab-panel" data-tab-panel="codegen">
+                            <div class="panel panel-tab">
+                                <div class="panel-head">
+                                    <div>
+                                        <p class="panel-kicker">Phase 04</p>
+                                        <h3>Generated Python</h3>
+                                    </div>
+                                </div>
+                                <pre id="codegenOutput" class="code-block">No generated code yet.</pre>
+                            </div>
+                        </section>
+
+                        <section class="tab-panel" data-tab-panel="runtime">
+                            <div class="panel panel-tab">
+                                <div class="panel-head">
+                                    <div>
+                                        <p class="panel-kicker">Phase 05</p>
+                                        <h3>Execution trace</h3>
+                                    </div>
+                                </div>
+                                <div class="trace-shell">
+                                    <div id="traceList" class="trace-list empty-state">Run a policy or workflow to inspect trace events.</div>
+                                </div>
+                                <pre id="runtimeOutput" class="code-block">Runtime not executed yet.</pre>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="status-bar">
+            <span class="status-label">Studio status</span>
+            <span id="statusMessage">Ready. Compile the sample or translate a brief into DSL.</span>
+        </footer>
+    </div>
+
+    <script>
+        window.COMPILER_STUDIO_BOOT = {
+            samples: {{ samples | tojson }},
+            phaseSpecs: {{ phase_specs | tojson }}
+        };
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

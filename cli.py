@@ -33,21 +33,21 @@ def main():
             if not source:
                 continue
 
-            print("\n⚙️  Processing...")
+            print("\nProcessing...")
 
             # 1. NLP Translation
             looks_like_dsl = "{" in source and ("policy" in source or "workflow" in source)
             if not looks_like_dsl:
                 converted_dsl, err = convert_nl_to_dsl(source)
                 if err:
-                    print(f"\n❌ AI Translation Failed: {err}")
+                    print(f"\nAI Translation Failed: {err}")
                     continue
-                print("\n✨ Generated DSL:")
+                print("\nGenerated DSL:")
                 print(converted_dsl)
                 source = converted_dsl
 
             # 2. Compilation
-            print("\n⚙️  Compiling...")
+            print("\nCompiling...")
             result = compile_dsl(source)
 
             # 3. Output
@@ -66,21 +66,21 @@ def main():
             print("\n[2] PARSER")
             if result.get("ast"):
                 ast_dict = result["ast"]
-                print("  ✅ AST generated successfully.")
+                print(" AST generated successfully.")
                 print(f"    Policies : {len(ast_dict.get('policies', []))}")
                 print(f"    Workflows: {len(ast_dict.get('workflows', []))}")
 
             print("\n[3] SEMANTIC ANALYZER")
             if result.get("semantic", {}).get("valid"):
-                print("  ✅ PASS: No semantic errors found.")
+                print(" PASS: No semantic errors found.")
             else:
-                print("  ❌ FAIL: Semantic errors detected:")
+                print(" FAIL: Semantic errors detected:")
                 for e in result.get("semantic", {}).get("errors", []):
                     print(f"    - {e['message']} (Line {e.get('line', 'unknown')})")
 
             print("\n[4] CODE GENERATOR")
             if result.get("generated_code"):
-                print("  ✅ Python Code:\n")
+                print(" Python Code:\n")
                 print("-" * 50)
                 print(result["generated_code"])
                 print("-" * 50)
@@ -89,7 +89,7 @@ def main():
             print("  (Execution skipped in CLI mode - no runtime inputs provided)")
 
             if result.get("errors"):
-                print("\n❌ FATAL COMPILATION ERRORS:")
+                print("\nFATAL COMPILATION ERRORS:")
                 for e in result["errors"]:
                     print(f"  [{e.get('stage', 'unknown').upper()}]: {e.get('message')}")
 
