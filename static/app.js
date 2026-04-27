@@ -307,7 +307,8 @@ async function translateBrief() {
         setStatus(data.message || "Plain English brief translated into DSL.");
         updateMetrics(null);
     } catch (error) {
-        setStatus(error.message || "Translation failed.");
+        const detail = error.details ? ` ${error.details}` : "";
+        setStatus(`${error.message || "Translation failed."}${detail}`);
     } finally {
         elements.translateBtn.disabled = false;
     }

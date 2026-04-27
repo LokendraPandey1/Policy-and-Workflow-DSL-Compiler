@@ -41,3 +41,68 @@ Then create an IncidentResponse workflow.
 First step CheckHealth executes ServerHealth policy. If it passes, go to the next step. If it fails, reject with "Server offline". 
 Step LogStatus performs an action "Log metrics". Complete -> next. 
 Step ClearAlert performs action "Mark healthy". Complete -> done.
+
+==================================================
+Scenario 4: Hospital Appointment Approval
+==================================================
+Create a policy called InsuranceCheck that takes inputs for has_active_insurance, copay_amount, and patient_age.
+The policy should pass if insurance is active, copay amount is less than or equal to 100, and patient age is at least 18.
+Create another policy called SlotAvailability that takes a boolean doctor_available and a number waiting_days.
+It should pass if the doctor is available and waiting days are less than or equal to 7.
+Now create a workflow called AppointmentBooking.
+First step VerifyInsurance executes the InsuranceCheck policy. If it passes, go to the next step. If it fails, reject with "Insurance details invalid".
+Second step CheckSlots executes the SlotAvailability policy. If it passes, go to the next step. If it fails, reject with "No appointment slots available".
+Third step ConfirmVisit performs an action "Send appointment confirmation to patient". On complete go to next.
+Final step NotifyDoctor performs an action "Update doctor's schedule". On complete the workflow is done.
+
+==================================================
+Scenario 5: Employee Onboarding
+==================================================
+Write a policy named DocumentVerification that takes has_offer_letter, has_id_proof, and has_tax_form as boolean inputs.
+It should pass if all three documents are present.
+Write another policy named EligibilityCheck taking background_clear as boolean, years_experience as number, and age as number.
+It should pass if the background is clear, years of experience are at least 1, and age is at least 21.
+Create a workflow EmployeeOnboarding.
+Step CollectDocuments runs the DocumentVerification policy. Pass -> next, Fail -> reject "Missing required documents".
+Step VerifyEligibility runs the EligibilityCheck policy. Pass -> next, Fail -> reject "Candidate not eligible for onboarding".
+Step CreateAccount action "Create employee email and system accounts". Complete -> next.
+Step ScheduleOrientation action "Schedule orientation session". Complete -> done.
+
+==================================================
+Scenario 6: Warehouse Dispatch
+==================================================
+Create a policy called InventoryCheck with inputs ordered_units, available_units, and is_item_damaged.
+The policy passes if ordered units are greater than 0, available units are greater than or equal to ordered units, and the item is not damaged.
+Create a policy called AddressValidation with inputs postal_code_valid, customer_present, and delivery_distance.
+It should pass if postal code is valid, customer is present, and delivery distance is less than 50.
+Then make a workflow DispatchOrder.
+First step ValidateInventory executes InventoryCheck. If it passes, go to the next step. If it fails, reject with "Inventory issue detected".
+Next step ValidateAddress executes AddressValidation. If it passes, go to the next step. If it fails, reject with "Delivery address invalid".
+Next step PackShipment performs an action "Pack and label the shipment". On complete go to next.
+Last step HandoverCourier performs an action "Assign package to courier". On complete go to done.
+
+==================================================
+Scenario 7: Scholarship Review
+==================================================
+Create a policy named AcademicMerit taking gpa, attendance, and disciplinary_cases.
+It should pass if gpa is at least 3.5, attendance is at least 85, and disciplinary cases are equal to 0.
+Create a policy named FinancialNeed taking family_income, dependents, and has_special_category.
+It should pass if family income is less than 400000, dependents are at least 2, or has_special_category is true.
+Create a workflow ScholarshipApproval.
+Step CheckMerit executes the AcademicMerit policy. If it passes, continue to the next step. If it fails, reject with "Academic criteria not satisfied".
+Step CheckNeed executes the FinancialNeed policy. If it passes, continue to the next step. If it fails, reject with "Financial need criteria not satisfied".
+Step RecordDecision performs an action "Record scholarship approval in student portal". On complete go to next.
+Step SendNotice performs an action "Send award notification email". On complete go to done.
+
+==================================================
+Scenario 8: Travel Request Processing
+==================================================
+Create a policy called BudgetApproval with inputs estimated_cost, approved_budget, and manager_approved.
+It should pass if estimated cost is less than or equal to approved budget and manager approved is true.
+Create a policy called ComplianceCheck with inputs passport_valid, visa_required, and visa_ready.
+It should pass if passport is valid and either visa is not required or visa is ready.
+Build a workflow TravelAuthorization.
+The first step ReviewBudget executes the BudgetApproval policy. On pass go to next, on fail reject with "Travel budget not approved".
+The second step ReviewCompliance executes the ComplianceCheck policy. On pass go to next, on fail reject with "Travel documents incomplete".
+The third step ReserveTickets performs an action "Reserve flights and hotel". On complete go to next.
+The final step NotifyTraveler performs an action "Send itinerary to employee". On complete go to done.

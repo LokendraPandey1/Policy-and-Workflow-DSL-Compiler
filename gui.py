@@ -342,7 +342,14 @@ def translate():
 
     converted_dsl, err = convert_nl_to_dsl(nl_text)
     if err:
-        return jsonify({"ok": False, "message": err}), 400
+        app.logger.error("Translation failed: %s", err)
+        return jsonify(
+            {
+                "ok": False,
+                "message": "Translation failed.",
+                "details": err,
+            }
+        ), 400
 
     return jsonify(
         {
